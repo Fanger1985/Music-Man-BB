@@ -86,6 +86,45 @@
             }
         }
 
+        @keyframes glow {
+            0%, 100% {
+                box-shadow: 0 0 15px rgba(0, 255, 0, 0.6), 0 0 20px rgba(0, 255, 0, 0.4);
+            }
+            50% {
+                box-shadow: 0 0 25px rgba(0, 255, 0, 0.8), 0 0 35px rgba(0, 255, 0, 0.6);
+            }
+        }
+
+        @keyframes wink {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1, 0.1);  /* squish vertically */
+            }
+        }
+        
+        @keyframes blink {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1, 0.05);  /* compress vertically */
+            }
+        }
+        
+        @keyframes fullGlow {
+            from {
+                background: #222;
+                box-shadow: 0 0 15px rgba(0, 255, 0, 0.6), 0 0 20px rgba(0, 255, 0, 0.4);
+            }
+            to {
+                background: #00ff00;
+                color: #222;
+                box-shadow: 0 0 20px rgba(0, 255, 0, 0.8), 0 0 30px rgba(0, 255, 0, 0.6);
+            }
+        }
+
         canvas {
             position: fixed;
             top: 0;
@@ -171,6 +210,60 @@
         let canvas = document.getElementById('visualizer');
         let ctx = canvas.getContext('2d');
 
+        function applyEyeEffects() {
+            const buttons = document.querySelectorAll('button');
+            setInterval(() => {
+                buttons.forEach(button => {
+                    button.style.animation = 'glow 2s infinite';
+                });
+            }, 5000);  // apply glowing effect every 5 seconds
+
+            setTimeout(() => {
+                const randomButton = buttons[Math.floor(Math.random() * buttons.length)];
+                randomButton.style.animation = 'wink 0.5s 1';
+                setTimeout(() => {
+                    randomButton.style.animation = '';  // reset after wink
+                }, 500);
+            }, 7500);  // wink randomly after 7.5 seconds
+        }
+
+        function applyEyeAnimations() {
+            const buttons = document.querySelectorAll('button');
+
+            // Full glow effect every 8 seconds, lasting for 15 seconds
+            setInterval(() => {
+                buttons.forEach(button => {
+                    button.style.animation = 'fullGlow 15s ease-out forwards';
+                });
+            }, 8000); // This triggers the full glow every 8 seconds
+
+            // Make sure other animations like blink and wink don't reset the glow
+            setInterval(() => {
+                buttons.forEach(button => {
+                    if (button.style.animationName !== 'fullGlow') {
+                        button.style.animation = 'glow 2s infinite';
+                    }
+                });
+            }, 5000);
+
+            // Blink every 4 seconds
+            setInterval(() => {
+                buttons.forEach(button => {
+                    if (button.style.animationName !== 'fullGlow') {
+                        button.style.animation = 'blink 0.5s 1 forwards';
+                    }
+                });
+            }, 4000);
+
+            // Wink randomly after 7.5 seconds
+            setTimeout(() => {
+                const randomButton = buttons[Math.floor(Math.random() * buttons.length)];
+                if (randomButton.style.animationName !== 'fullGlow') {
+                    randomButton.style.animation = 'wink 0.5s 1 forwards';
+                }
+            }, 7500);
+        }
+
         function drawVisualizer() {
             requestAnimationFrame(drawVisualizer);
             let dataArray = new Uint8Array(analyser.frequencyBinCount);
@@ -223,6 +316,8 @@
             ctx.fillRect(0, 0, canvas.width, canvas.height);
         }
 
+        applyEyeEffects();
+        applyEyeAnimations();
         drawVisualizer(); // Start the visualizer
         audio.play(); // Start playing
 
